@@ -1,0 +1,180 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        -160
+      ],
+      "id": "1113f97d-89e8-451e-a695-7bbab039b3fe",
+      "name": "Gmail Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "89a7ac9e-9c6a-4a4c-8ab5-b4433f157a43",
+              "leftValue": "={{ $binary }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -96,
+        -160
+      ],
+      "id": "b7bb2f00-f619-4210-8e9c-372340146f86",
+      "name": "filter emails with attachments"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=checkout the new attachment that has been uploaded to the google drive folder. Subject: \"\" {{ $('filter emails with attachments').item.json.subject }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -144
+      ],
+      "id": "60cdd794-feed-46d3-b52e-1ae272b30779",
+      "name": "Discord",
+      "webhookId": "da64e217-635f-4734-b917-a30a472fe519"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -160
+      ],
+      "id": "5d4434c6-7015-4c80-84bc-4addc2927d20",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{$binary.keys().first()}}",
+        "name": "={{ $('filter emails with attachments').item.json.headers.subject }} + \"_\" {{$binary.values().first().fileName}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        320,
+        -160
+      ],
+      "id": "0d07fb80-8bd8-4b28-8b7d-5ddb760f2b45",
+      "name": "Upload file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "filter emails with attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter emails with attachments": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "db0a84f4-006c-47a3-958c-e2e5ec8dfd45",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e888f0bd2c50d46a7f3f16b82b0e285082b3c10e907981b00e5b9e61d9acaf43"
+  },
+  "id": "Rk3x95kDS1RKAAcP",
+  "tags": []
+}
